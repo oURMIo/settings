@@ -41,6 +41,17 @@
     sd      = stash drop
     # Synchronization
     sync    = !git fetch origin && git rebase origin/$(git symbolic-ref --short HEAD)
+    # Worktrees
+    wtl     = worktree list
+    wts     = "!git worktree list --porcelain | sed -n 's/^worktree //p' | while read -r d; do echo \"== $d\"; git -C \"$d\" status -sb; done"
+    wtp     = "!f() { git worktree list --porcelain | awk -v b=\"refs/heads/$1\" '/^worktree /{p=substr($0,10); if (b==\"refs/heads/\") {print p; f=1; exit}} $1==\"branch\" && $2==b {print p; f=1; exit} END{exit !f}'; }; f"
+    wta     = "!f() { [ -n \"$1\" ] || { echo \"usage: git wta <branch> [base]\"; return 1; }; dir=\"$(git wtp)-$(echo \"$1\" | tr / -)\"; if [ -z \"$2\" ] && { git show-ref --verify --quiet \"refs/heads/$1\" || git show-ref --verify --quiet \"refs/remotes/origin/$1\"; }; then git worktree add \"$dir\" \"$1\"; else git worktree add -b \"$1\" \"$dir\" ${2:+\"$2\"}; fi; }; f"
+    wtsend  = "!f() { dir=$(git wtp \"$1\") && [ -n \"$1\" ] || { echo \"no worktree for branch: $1\"; return 1; }; [ -n \"$(git status --porcelain)\" ] || { echo \"nothing to send\"; return 1; }; git stash push -u -m \"wtsend to $1\" && git -C \"$dir\" stash pop; }; f"
+    wtc     = "!f() { git wta \"$@\" && git wtsend \"$1\"; }; f"
+    wtmv    = "!f() { dir=$(git wtp \"$1\") && [ -n \"$2\" ] || { echo \"usage: git wtmv <branch> <new-path>\"; return 1; }; cd \"${GIT_PREFIX:-.}\" && git worktree move \"$dir\" \"$2\"; }; f"
+    wtrm    = "!f() { dir=$(git wtp \"$1\") && [ -n \"$1\" ] || { echo \"no worktree for branch: $1\"; return 1; }; shift; git worktree remove \"$@\" \"$dir\"; }; f"
+    wtrmb   = "!f() { b=\"$1\"; git wtrm \"$@\" && git branch -d \"$b\"; }; f"
+    wtpr    = worktree prune -v
     # Utilities
     aliases = config --get-regexp alias
 [apply]
