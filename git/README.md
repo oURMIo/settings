@@ -63,6 +63,32 @@
 |-------|-------|-------------|
 | `sync` | `git sync` | Fetch from origin and rebase current branch on top |
 
+
+ ## 🌳 Worktrees
+ 
+ New worktrees are created next to the main repo as `<repo>-<branch>` (slashes in the branch name become dashes), e.g. `~/code/app` + `feature/auth` → `~/code/app-feature-auth`. All aliases take a **branch name**, not a path.
+ 
+ | Alias | Usage | Description |
+ |-------|-------|-------------|
+ | `wtl` | `git wtl` | List all worktrees |
+ | `wts` | `git wts` | Short status of every worktree |
+ | `wtp` | `git wtp [branch]` | Print path of the worktree for a branch (no argument = main worktree) |
+ | `wta` | `git wta feature/auth [base]` | Add a worktree for a branch; creates the branch (from `base` or HEAD) if it does not exist, tracks `origin/<branch>` if it does |
+ | `wtsend` | `git wtsend feature/auth` | Move uncommitted changes (including untracked files) from the current worktree to the worktree of a branch |
+ | `wtc` | `git wtc feature/auth [base]` | Create a worktree and carry current uncommitted changes into it (`wta` + `wtsend`) |
+ | `wtmv` | `git wtmv feature/auth ../new-dir` | Move a worktree directory to a new location |
+ | `wtrm` | `git wtrm feature/auth [--force]` | Remove the worktree of a branch (keeps the branch) |
+ | `wtrmb` | `git wtrmb feature/auth [--force]` | Remove the worktree and delete its branch (safe `-d`) |
+ | `wtpr` | `git wtpr` | Prune records of worktrees whose directories were deleted manually |
+ 
+ A git alias cannot change the directory of your shell, so switching is done with `cd "$(git wtp feature/auth)"`. To make it a one-word command, add this to `~/.bashrc` / `~/.zshrc`:
+ 
+ ```sh
+ # wt            -> cd to the main worktree
+ # wt <branch>   -> cd to the worktree of <branch>
+ wt() { cd "$(git wtp "$1")" || return; }
+ ```
+
 ## ⚙️ Utilities
 
 | Alias | Usage | Description |
